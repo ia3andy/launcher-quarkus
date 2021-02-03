@@ -116,8 +116,8 @@ const defaultCleanHistory = () => {
 };
 
 export function parseProjectInQuery(extensions: ExtensionEntry[],
-  search: string = window.location.search.substr(1),
-  cleanHistory: () => void = defaultCleanHistory): QuarkusProject | undefined {
+                                    search: string = window.location.search.substr(1),
+                                    cleanHistory: () => void = defaultCleanHistory): QuarkusProject | undefined {
   if (search.length === 0) {
     return undefined;
   }
