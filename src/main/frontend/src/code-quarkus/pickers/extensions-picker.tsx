@@ -36,6 +36,7 @@ interface ExtensionsPickerProps extends InputProps<ExtensionsPickerValue> {
   filterParam?: string;
 
   filterFunction?(d: ExtensionEntry): boolean;
+  syncFilterParamFunction?(filterValue: string): void;
 }
 
 interface ExtensionProps extends ExtensionEntry {
@@ -232,13 +233,20 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
   };
   const result = processEntries(filter, props.entries);
 
+  const syncParam = useCallback((filterValue: string): void => {
+    if (props.syncFilterParamFunction) {
+      props.syncFilterParamFunction(filterValue);
+    }
+  }, [props]);
+
   const addParamToFilter = useCallback(() => {
     const extensionSearch = props.filterParam;
 
     if (extensionSearch) {
       setFilter(extensionSearch);
+      syncParam(extensionSearch);
     }
-  }, [props.filterParam]);
+  }, [props.filterParam, syncParam]);
 
   useEffect(() => {
     addParamToFilter();
@@ -274,6 +282,7 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
   const search = (f: string) => {
     setKeyBoardActived(-1);
     setFilter(f);
+    syncParam(f);
   };
 
   const flip = (index: number, origin: string) => {

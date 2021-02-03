@@ -94,6 +94,18 @@ const getParams = (paramName: string): string | null => {
   return searchParams.get(paramName);
 }
 
+export function syncFilterWithQueryParam(filterParam: string): void {
+  window.history.replaceState(null, '', `/?${formatParam(queryName, filterParam)}`)
+}
+
+const formatParam = (paramName: string, value: string): string => {
+  if (value) {
+    return `${paramName}=${value}`;
+  }
+
+  return '';
+}
+
 export function resolveInitialProject(extensions: ExtensionEntry[]) {
   return parseProjectInQuery(extensions) || newDefaultProject();
 }
@@ -104,8 +116,8 @@ const defaultCleanHistory = () => {
 };
 
 export function parseProjectInQuery(extensions: ExtensionEntry[],
-                                    search: string = window.location.search.substr(1),
-                                    cleanHistory: () => void = defaultCleanHistory): QuarkusProject | undefined {
+  search: string = window.location.search.substr(1),
+  cleanHistory: () => void = defaultCleanHistory): QuarkusProject | undefined {
   if (search.length === 0) {
     return undefined;
   }

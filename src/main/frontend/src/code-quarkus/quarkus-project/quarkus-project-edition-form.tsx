@@ -4,7 +4,7 @@ import { ExtensionEntry, ExtensionsPicker } from '../pickers/extensions-picker';
 import { InfoPicker, isValidInfo } from '../pickers/info-picker';
 import { GenerateButton } from './generate-button';
 import { Config, QuarkusProject } from '../api/model';
-import { Target } from '../api/quarkus-project-utils';
+import { Target, syncFilterWithQueryParam } from '../api/quarkus-project-utils';
 
 interface CodeQuarkusFormProps {
   project: QuarkusProject;
@@ -57,6 +57,7 @@ export function CodeQuarkusForm(props: CodeQuarkusFormProps) {
           placeholder="RESTEasy, Hibernate ORM, Web..."
           buildTool={props.project.metadata.buildTool}
           filterParam={props.filterParam}
+          syncFilterParamFunction={syncFilterWithQueryParam}
         />
       </div>
 
