@@ -94,8 +94,13 @@ const getParams = (paramName: string): string | null => {
   return searchParams.get(paramName);
 }
 
-export function syncFilterWithQueryParam(filterParam: string): void {
-  window.history.replaceState(null, '', `/?${formatParam(queryName, filterParam)}`)
+export function syncParamsInQuery(filterParam: string = '', project: QuarkusProject | undefined): void {
+  if (!project) {
+    window.history.replaceState(null, '', `/?${formatParam(queryName, filterParam)}`);
+    return;
+  }
+
+  window.history.replaceState(null, '', `/?${generateProjectQuery(project)}&${formatParam(queryName, filterParam)}`)
 }
 
 const formatParam = (paramName: string, value: string): string => {

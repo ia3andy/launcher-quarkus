@@ -24,7 +24,7 @@ interface QuarkusProjectFlowProps extends CodeQuarkusProps {
 }
 
 export function QuarkusProjectFlow(props: QuarkusProjectFlowProps) {
-  const [filterQuery] = useState<string>(resolveInitialFilterQueryParam());
+  const [filterQuery, setFilterQuery] = useState<string>(resolveInitialFilterQueryParam());
   const [project, setProject] = useState<QuarkusProject>(resolveInitialProject(props.extensions));
   const [run, setRun] = useState<RunState>({ status: Status.EDITION });
   const analytics = useAnalytics();
@@ -61,7 +61,7 @@ export function QuarkusProjectFlow(props: QuarkusProjectFlowProps) {
 
   return (
     <React.Fragment>
-      <CodeQuarkusForm project={project} setProject={setProject} config={props.config} onSave={generate} extensions={props.extensions} filterParam={filterQuery}/>
+      <CodeQuarkusForm project={project} setProject={setProject} config={props.config} onSave={generate} extensions={props.extensions} filterParam={filterQuery} setFilterParam={setFilterQuery}/>
       {!run.error && run.status === Status.RUNNING && (
         <LoadingModal/>
       )}

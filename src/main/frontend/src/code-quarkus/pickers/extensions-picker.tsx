@@ -3,11 +3,12 @@ import { CheckSquareIcon, EllipsisVIcon, MapIcon, OutlinedSquareIcon, SearchIcon
 import classNames from 'classnames';
 import hotkeys from 'hotkeys-js';
 import _ from 'lodash';
-import React, { KeyboardEvent, useEffect, useRef, useState, useCallback } from 'react';
+import React, { SetStateAction, KeyboardEvent, useEffect, useRef, useState, useCallback } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { InputProps, useAnalytics, CopyToClipboard } from '../../core';
 import { QuarkusBlurb } from '../layout/quarkus-blurb';
 import { processEntries } from './extensions-picker-utils';
+import { QuarkusProject } from '../api/model';
 import './extensions-picker.scss';
 
 export interface ExtensionEntry {
@@ -33,10 +34,13 @@ interface ExtensionsPickerProps extends InputProps<ExtensionsPickerValue> {
   entries: ExtensionEntry[];
   placeholder: string;
   buildTool: string;
+  project?: QuarkusProject;
+
   filterParam?: string;
+  setFilterParam?: React.Dispatch<SetStateAction<string>>;
 
   filterFunction?(d: ExtensionEntry): boolean;
-  syncFilterParamFunction?(filterValue: string): void;
+  syncParamsInQueryFunction?(filterValue: string, project: QuarkusProject | undefined): void;
 }
 
 interface ExtensionProps extends ExtensionEntry {
@@ -233,20 +237,18 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
   };
   const result = processEntries(filter, props.entries);
 
-  const syncParam = useCallback((filterValue: string): void => {
-    if (props.syncFilterParamFunction) {
-      props.syncFilterParamFunction(filterValue);
+  const syncParams = useCallback((filterValue: string, project: QuarkusProject | undefined): void => {
+    if (props.syncParamsInQueryFunction) {
+      props.syncParamsInQueryFunction(filterValue, project);
     }
   }, [props]);
 
   const addParamToFilter = useCallback(() => {
-    const extensionSearch = props.filterParam;
+    const extensionSearch = props.filterParam || '';
 
-    if (extensionSearch) {
-      setFilter(extensionSearch);
-      syncParam(extensionSearch);
-    }
-  }, [props.filterParam, syncParam]);
+    setFilter(extensionSearch);
+    syncParams(extensionSearch, props.project);
+  }, [props.filterParam, props.project, syncParams]);
 
   useEffect(() => {
     addParamToFilter();
@@ -259,6 +261,11 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
     }
   }, [filter, result, debouncedSearchEvent]);
 
+  const setFilterParam = (value: string) => {
+    if (props.setFilterParam) {
+      props.setFilterParam(value);
+    }
+  }
   const add = (index: number, origin: string) => {
     const id = result[index].id;
     entrySet.add(id);
@@ -282,7 +289,8 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
   const search = (f: string) => {
     setKeyBoardActived(-1);
     setFilter(f);
-    syncParam(f);
+    setFilterParam(f);
+    syncParams(f, props.project);
   };
 
   const flip = (index: number, origin: string) => {
