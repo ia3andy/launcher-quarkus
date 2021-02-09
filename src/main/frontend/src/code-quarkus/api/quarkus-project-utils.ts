@@ -17,13 +17,15 @@ export interface GenerateResult {
 }
 
 export function generateProjectQuery(project: QuarkusProject, github: boolean = false): string {
+  const defaultProject = newDefaultProject();
+
   const params: any = {
-    ...(project.metadata.groupId && { g: project.metadata.groupId }),
-    ...(project.metadata.artifactId && { a: project.metadata.artifactId }),
-    ...(project.metadata.version && { v: project.metadata.version }),
-    ...(project.metadata.buildTool && { b: project.metadata.buildTool }),
-    ...(project.metadata.noExamples && { ne: project.metadata.noExamples }),
-    ...(project.extensions && { s: project.extensions.map(e => e.shortId).join('.') }),
+    ...(project.metadata.groupId && project.metadata.groupId !== defaultProject.metadata.groupId && { g: project.metadata.groupId }),
+    ...(project.metadata.artifactId && project.metadata.artifactId !== defaultProject.metadata.artifactId && { a: project.metadata.artifactId }),
+    ...(project.metadata.version && project.metadata.version !== defaultProject.metadata.version && { v: project.metadata.version }),
+    ...(project.metadata.buildTool && project.metadata.buildTool !== defaultProject.metadata.buildTool && { b: project.metadata.buildTool }),
+    ...(project.metadata.noExamples && project.metadata.noExamples !== defaultProject.metadata.noExamples && { ne: project.metadata.noExamples }),
+    ...(project.extensions && project.extensions.length !== defaultProject.extensions.length && { s: project.extensions.map(e => e.shortId).join('.') }),
     cn: CLIENT_NAME
   };
   if (github) {
@@ -100,8 +102,8 @@ export function syncParamsInQuery(filterParam: string = '', project: QuarkusProj
     return;
   }
 
-  window.history.replaceState(null, '', `/?${generateProjectQuery(project)}&${formatParam(queryName, filterParam)}`)
-}
+  window.history.replaceState(null, '', `/${generateParamQuery(formatParam(queryName, filterParam), generateProjectQuery(project))}`)
+};
 
 const formatParam = (paramName: string, value: string): string => {
   if (value) {
@@ -109,7 +111,23 @@ const formatParam = (paramName: string, value: string): string => {
   }
 
   return '';
-}
+};
+
+const generateParamQuery = (filter: string, project: string) => {
+  if (filter && project) {
+    return '?' + project + '&' + filter;
+  }
+
+  if (project) {
+    return '?' + project;
+  }
+
+  if (filter) {
+    return '?' + filter;
+  }
+
+  return '';
+};
 
 export function resolveInitialProject(extensions: ExtensionEntry[]) {
   return parseProjectInQuery(extensions) || newDefaultProject();

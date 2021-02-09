@@ -1,11 +1,12 @@
-import { Button, Dropdown, DropdownItem, DropdownPosition, FormGroup, KebabToggle, TextInput, Tooltip } from '@patternfly/react-core';
+import { Button, Dropdown, DropdownItem, DropdownPosition, FormGroup, KebabToggle, Tooltip } from '@patternfly/react-core';
 import { CheckSquareIcon, EllipsisVIcon, MapIcon, OutlinedSquareIcon, SearchIcon, TrashAltIcon } from '@patternfly/react-icons';
 import classNames from 'classnames';
 import hotkeys from 'hotkeys-js';
 import _ from 'lodash';
 import React, { SetStateAction, KeyboardEvent, useEffect, useRef, useState, useCallback } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { InputProps, useAnalytics, CopyToClipboard } from '../../core';
+import { InputProps, useAnalytics, CopyToClipboard, useDebounce } from '../../core';
+import { DebouncedTextInput } from '../../core/debounced-text-input';
 import { QuarkusBlurb } from '../layout/quarkus-blurb';
 import { processEntries } from './extensions-picker-utils';
 import { QuarkusProject } from '../api/model';
@@ -40,7 +41,7 @@ interface ExtensionsPickerProps extends InputProps<ExtensionsPickerValue> {
   setFilterParam?: React.Dispatch<SetStateAction<string>>;
 
   filterFunction?(d: ExtensionEntry): boolean;
-  syncParamsInQueryFunction?(filterValue: string, project: QuarkusProject | undefined): void;
+  syncParamsInQueryFunction?(filterValue: string | undefined, project: QuarkusProject | undefined): void;
 }
 
 interface ExtensionProps extends ExtensionEntry {
@@ -290,8 +291,17 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
     setKeyBoardActived(-1);
     setFilter(f);
     setFilterParam(f);
-    syncParams(f, props.project);
   };
+  const clearFilterButton = () => {
+    setFilter('');
+    setFilterParam('');
+  };
+
+  useDebounce(() => {
+    if (props.syncParamsInQueryFunction) {
+      props.syncParamsInQueryFunction(props.filterParam, props.project);
+    }
+  }, 2000);
 
   const flip = (index: number, origin: string) => {
     if (!result[index] || result[index].default) {
@@ -328,7 +338,7 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
             fieldId="search-extensions-input"
           >
             <SearchIcon/>
-            <TextInput
+            <DebouncedTextInput
               id="extension-search"
               type="search"
               onKeyDown={onSearchKeyDown}
@@ -337,6 +347,7 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
               className="search-extensions-input"
               value={filter}
               onChange={search}
+              delay={1000}
             />
           </FormGroup>
         </Tooltip>
@@ -362,7 +373,7 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
         <QuarkusBlurb/>
         {!!filter && (
           <div className="extension-search-clear">
-            Search results (<Button variant="link" onClick={() => setFilter('')}>Clear search</Button>)
+            Search results (<Button variant="link" onClick={clearFilterButton}>Clear search</Button>)
           </div>
         )}
         <div className="extension-list-wrapper">
