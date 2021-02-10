@@ -16,23 +16,28 @@ export interface GenerateResult {
   shareUrl?: string;
 }
 
-export function generateProjectQuery(project: QuarkusProject, github: boolean = false): string {
+export function generateProjectQuery(project: QuarkusProject, github: boolean = false, shownDefaultParams: boolean = true): string {
   const defaultProject = newDefaultProject();
 
   const params: any = {
-    ...(project.metadata.groupId && project.metadata.groupId !== defaultProject.metadata.groupId && { g: project.metadata.groupId }),
-    ...(project.metadata.artifactId && project.metadata.artifactId !== defaultProject.metadata.artifactId && { a: project.metadata.artifactId }),
-    ...(project.metadata.version && project.metadata.version !== defaultProject.metadata.version && { v: project.metadata.version }),
-    ...(project.metadata.buildTool && project.metadata.buildTool !== defaultProject.metadata.buildTool && { b: project.metadata.buildTool }),
-    ...(project.metadata.noExamples && project.metadata.noExamples !== defaultProject.metadata.noExamples && { ne: project.metadata.noExamples }),
-    ...(project.extensions && project.extensions.length !== defaultProject.extensions.length && { s: project.extensions.map(e => e.shortId).join('.') }),
+    ...(project.metadata.groupId && validateFieldDefaultParam(shownDefaultParams, project.metadata.groupId !== defaultProject.metadata.groupId) && { g: project.metadata.groupId }),
+    ...(project.metadata.artifactId && validateFieldDefaultParam(shownDefaultParams, project.metadata.artifactId !== defaultProject.metadata.artifactId) && { a: project.metadata.artifactId }),
+    ...(project.metadata.version && validateFieldDefaultParam(shownDefaultParams, project.metadata.version !== defaultProject.metadata.version) && { v: project.metadata.version }),
+    ...(project.metadata.buildTool && validateFieldDefaultParam(shownDefaultParams, project.metadata.buildTool !== defaultProject.metadata.buildTool) && { b: project.metadata.buildTool }),
+    ...(project.metadata.noExamples && validateFieldDefaultParam(shownDefaultParams, project.metadata.noExamples !== defaultProject.metadata.noExamples) && { ne: project.metadata.noExamples }),
+    ...(project.extensions && validateFieldDefaultParam(shownDefaultParams, project.extensions.length !== defaultProject.extensions.length) && { s: project.extensions.map(e => e.shortId).join('.') }),
     cn: CLIENT_NAME
   };
   if (github) {
     params.github = true;
   }
+
   return stringify(params);
-}
+};
+
+const validateFieldDefaultParam = (shownDefaultParams: boolean, expression: boolean) => {
+  return (shownDefaultParams ? true : expression)
+};
 
 const BASE_LOCATION = window.location.href.replace(window.location.search, '');
 
@@ -102,7 +107,7 @@ export function syncParamsInQuery(filterParam: string = '', project: QuarkusProj
     return;
   }
 
-  window.history.replaceState(null, '', `/${generateParamQuery(formatParam(queryName, filterParam), generateProjectQuery(project))}`)
+  window.history.replaceState(null, '', `/${generateParamQuery(formatParam(queryName, filterParam), generateProjectQuery(project, false, false))}`)
 };
 
 const formatParam = (paramName: string, value: string): string => {
