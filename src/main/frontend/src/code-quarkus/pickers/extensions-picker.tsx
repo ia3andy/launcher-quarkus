@@ -1,12 +1,11 @@
-import { Button, Dropdown, DropdownItem, DropdownPosition, FormGroup, KebabToggle, Tooltip } from '@patternfly/react-core';
+import { Button, Dropdown, DropdownItem, DropdownPosition, FormGroup, KebabToggle, TextInput, Tooltip } from '@patternfly/react-core';
 import { CheckSquareIcon, EllipsisVIcon, MapIcon, OutlinedSquareIcon, SearchIcon, TrashAltIcon } from '@patternfly/react-icons';
 import classNames from 'classnames';
 import hotkeys from 'hotkeys-js';
 import _ from 'lodash';
 import React, { SetStateAction, KeyboardEvent, useEffect, useRef, useState, useCallback } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { InputProps, useAnalytics, CopyToClipboard, useDebounce } from '../../core';
-import { DebouncedTextInput } from '../../core/debounced-text-input';
+import { InputProps, useAnalytics, CopyToClipboard } from '../../core';
 import { QuarkusBlurb } from '../layout/quarkus-blurb';
 import { processEntries } from './extensions-picker-utils';
 import { QuarkusProject } from '../api/model';
@@ -224,6 +223,13 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
       events.forEach(e => analytics.event(e[0], e[1], e[2]));
     }, 3000)).current;
 
+  const debouncedSyncParamsQuery = useRef<(filterParam: string, project: QuarkusProject | undefined) => void>(_.debounce(
+    (filterParam, project) => {
+      if (props.syncParamsInQueryFunction) {
+        props.syncParamsInQueryFunction(filterParam, project);
+      }
+    }, 1000)).current;
+
   const extensions = props.value.extensions || [];
   const entrySet = new Set(extensions.map(e => e.id));
   const entriesById: Map<string, ExtensionEntry> = new Map(props.entries.map(item => [item.id, item]));
@@ -238,18 +244,12 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
   };
   const result = processEntries(filter, props.entries);
 
-  const syncParams = useCallback((filterValue: string, project: QuarkusProject | undefined): void => {
-    if (props.syncParamsInQueryFunction) {
-      props.syncParamsInQueryFunction(filterValue, project);
-    }
-  }, [props]);
-
   const addParamToFilter = useCallback(() => {
     const extensionSearch = props.filterParam || '';
 
     setFilter(extensionSearch);
-    syncParams(extensionSearch, props.project);
-  }, [props.filterParam, props.project, syncParams]);
+    debouncedSyncParamsQuery(extensionSearch, props.project);
+  }, [props.filterParam, props.project, debouncedSyncParamsQuery]);
 
   useEffect(() => {
     addParamToFilter();
@@ -297,12 +297,6 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
     setFilterParam('');
   };
 
-  useDebounce(() => {
-    if (props.syncParamsInQueryFunction) {
-      props.syncParamsInQueryFunction(props.filterParam, props.project);
-    }
-  }, 2000);
-
   const flip = (index: number, origin: string) => {
     if (!result[index] || result[index].default) {
       return;
@@ -338,7 +332,7 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
             fieldId="search-extensions-input"
           >
             <SearchIcon/>
-            <DebouncedTextInput
+            <TextInput
               id="extension-search"
               type="search"
               onKeyDown={onSearchKeyDown}
@@ -347,7 +341,6 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
               className="search-extensions-input"
               value={filter}
               onChange={search}
-              delay={1000}
             />
           </FormGroup>
         </Tooltip>
