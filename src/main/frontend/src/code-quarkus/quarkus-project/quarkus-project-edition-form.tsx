@@ -4,7 +4,7 @@ import { ExtensionEntry, ExtensionsPicker } from '../pickers/extensions-picker';
 import { InfoPicker, isValidInfo } from '../pickers/info-picker';
 import { GenerateButton } from './generate-button';
 import { Config, QuarkusProject } from '../api/model';
-import { Target, syncParamsInQuery } from '../api/quarkus-project-utils';
+import { Target } from '../api/quarkus-project-utils';
 
 interface CodeQuarkusFormProps {
   project: QuarkusProject;
@@ -61,7 +61,6 @@ export function CodeQuarkusForm(props: CodeQuarkusFormProps) {
           filterParam={props.filterParam}
           setFilterParam={props.setFilterParam}
           project={props.project}
-          syncParamsInQueryFunction={syncParamsInQuery}
         />
       </div>
 

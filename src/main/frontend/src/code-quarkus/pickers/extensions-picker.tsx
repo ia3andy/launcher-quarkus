@@ -10,6 +10,7 @@ import { QuarkusBlurb } from '../layout/quarkus-blurb';
 import { processEntries } from './extensions-picker-utils';
 import { QuarkusProject } from '../api/model';
 import './extensions-picker.scss';
+import {debouncedSyncParamsQuery} from "../api/quarkus-project-utils";
 
 export interface ExtensionEntry {
   id: string;
@@ -40,7 +41,6 @@ interface ExtensionsPickerProps extends InputProps<ExtensionsPickerValue> {
   setFilterParam?: React.Dispatch<SetStateAction<string>>;
 
   filterFunction?(d: ExtensionEntry): boolean;
-  syncParamsInQueryFunction?(filterValue: string | undefined, project: QuarkusProject | undefined): void;
 }
 
 interface ExtensionProps extends ExtensionEntry {
@@ -223,13 +223,6 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
       events.forEach(e => analytics.event(e[0], e[1], e[2]));
     }, 3000)).current;
 
-  const debouncedSyncParamsQuery = useRef<(filterParam: string, project: QuarkusProject | undefined) => void>(_.debounce(
-    (filterParam, project) => {
-      if (props.syncParamsInQueryFunction) {
-        props.syncParamsInQueryFunction(filterParam, project);
-      }
-    }, 1000)).current;
-
   const extensions = props.value.extensions || [];
   const entrySet = new Set(extensions.map(e => e.id));
   const entriesById: Map<string, ExtensionEntry> = new Map(props.entries.map(item => [item.id, item]));
@@ -266,7 +259,7 @@ export const ExtensionsPicker = (props: ExtensionsPickerProps) => {
     if (props.setFilterParam) {
       props.setFilterParam(value);
     }
-  }
+  };
   const add = (index: number, origin: string) => {
     const id = result[index].id;
     entrySet.add(id);
