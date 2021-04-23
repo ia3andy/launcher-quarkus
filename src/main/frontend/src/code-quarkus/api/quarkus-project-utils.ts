@@ -27,7 +27,7 @@ export function generateProjectQuery(project: QuarkusProject,
     ...(project.metadata.artifactId &&  project.metadata.artifactId !== defaultProject.metadata.artifactId) && { a: project.metadata.artifactId },
     ...(project.metadata.version && project.metadata.version !== defaultProject.metadata.version) && { v: project.metadata.version },
     ...(project.metadata.buildTool && project.metadata.buildTool !== defaultProject.metadata.buildTool) && { b: project.metadata.buildTool },
-    ...(project.metadata.noExamples && project.metadata.noExamples !== defaultProject.metadata.noExamples) && { ne: project.metadata.noExamples },
+    ...(project.metadata.noCode && project.metadata.noCode !== defaultProject.metadata.noCode) && { nc: project.metadata.noCode },
     ...(project.extensions && project.extensions.length !== defaultProject.extensions.length) && { e: project.extensions.map(e => toShortcut(e.id)) },
     ...(showClientName && { cn: CLIENT_NAME })
   };
@@ -87,7 +87,7 @@ export function newDefaultProject(): QuarkusProject {
       artifactId: 'code-with-quarkus',
       version: '1.0.0-SNAPSHOT',
       buildTool: 'MAVEN',
-      noExamples: false
+      noCode: false
     },
     extensions: [],
   });
@@ -177,7 +177,7 @@ export function parseProjectInQuery(extensions: ExtensionEntry[], queryParams?: 
       artifactId: queryParams.a || defaultProj.metadata.artifactId,
       version: queryParams.v || defaultProj.metadata.version,
       buildTool: queryParams.b || defaultProj.metadata.buildTool,
-      noExamples: queryParams.ne || defaultProj.metadata.noExamples
+      noCode: queryParams.nc || defaultProj.metadata.noCode
     },
     extensions: selectedExtensions,
     github: queryParams.github === 'true' ? {
