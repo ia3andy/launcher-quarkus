@@ -25,6 +25,17 @@ internal class QuarkusProjectServiceTest {
     lateinit var platformService: PlatformService
 
     @Test
+    fun testAll(info: TestInfo) {
+        val creator = getProjectService()
+        val extensions = platformService.recommendedCodeQuarkusExtensions.filter { it.platform }.map { it.id }.toHashSet()
+        extensions.remove("io.quarkus:quarkus-kotlin")
+        extensions.remove("io.quarkus:quarkus-scala")
+        println("extensions:${extensions.size}")
+        val proj = creator.create(platformService.recommendedPlatformInfo, ProjectDefinition(extensions = extensions, noCode = true))
+        val testDir = QuarkusProjectServiceTestUtils.extractProject(proj)
+    }
+    
+    @Test
     @DisplayName("When using default project, then, it should create the zip with all the files correctly with the requested content")
     fun testDefaultZip(info: TestInfo) {
         // When
