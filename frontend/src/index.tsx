@@ -5,16 +5,10 @@ import ReactDOM from 'react-dom';
 import './bootstrap-reboot.css';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import { SentryBoundary } from './sentry-boundary';
-import { CodeQuarkus } from './code-quarkus/code-quarkus';
-import { ConfigLoader } from './code-quarkus/loaders/config-loader';
+import { CodeQuarkus, fetchConfig, fetchPlatform } from '@quarkusio/code-quarkus.components';
 
 ReactDOM.render((
-  <ConfigLoader>{config => (
-    <SentryBoundary sentryDSN={config.sentryDSN} environment={config.environment}>
-      <CodeQuarkus config={config} />
-    </SentryBoundary>
-  )}</ConfigLoader>
+  <CodeQuarkus configApi={fetchConfig} platformApi={fetchPlatform} />
 ), document.getElementById('root'));
 
 // If you want to start measuring performance in your app, pass a function
