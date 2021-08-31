@@ -13,25 +13,25 @@
         "scope": "quarkusio.code-quarkus",
         "version": "0.0.5",
         "mainFile": "index.ts",
-        "rootDir": "code-quarkus/components"
+        "rootDir": "ui-components/code-quarkus/components"
     },
     "core/analytics": {
         "scope": "quarkusio.code-quarkus",
         "version": "0.0.2",
         "mainFile": "index.ts",
-        "rootDir": "code-quarkus/core/analytics"
+        "rootDir": "ui-components/code-quarkus/core/analytics"
     },
     "core/components": {
         "scope": "quarkusio.code-quarkus",
         "version": "0.0.2",
         "mainFile": "index.ts",
-        "rootDir": "code-quarkus/core/components"
+        "rootDir": "ui-components/code-quarkus/core/components"
     },
     "core/types": {
         "scope": "quarkusio.code-quarkus",
         "version": "0.0.1",
         "mainFile": "index.ts",
-        "rootDir": "code-quarkus/core/types"
+        "rootDir": "ui-components/code-quarkus/core/types"
     },
     "$schema-version": "14.9.0"
 }
